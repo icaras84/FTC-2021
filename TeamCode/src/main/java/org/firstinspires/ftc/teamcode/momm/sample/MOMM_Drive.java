@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
@@ -19,6 +18,7 @@ import org.firstinspires.ftc.teamcode.robot.Globals;
 //@TeleOp(name = "MOMM_Drive", group = "Test")
 @Config
 public class MOMM_Drive extends OpMode {
+
     // Config
     public static boolean DEBUG = false;
     private static final int INPUT_SCALING_EXPONENT = 3;
@@ -113,4 +113,5 @@ public class MOMM_Drive extends OpMode {
         driveLeft.setPower(0);
         driveRight.setPower(0);
     }
+
 }

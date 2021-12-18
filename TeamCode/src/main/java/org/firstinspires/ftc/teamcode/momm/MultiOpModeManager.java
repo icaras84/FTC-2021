@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.momm;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
-import org.firstinspires.ftc.teamcode.robot.Globals;
 
 import java.util.Vector;
 
@@ -14,7 +13,7 @@ public class MultiOpModeManager extends OpMode {
 
     // Init the list and Globals
     public MultiOpModeManager() {
-        Globals.opmode = this;
+        //Globals.opmode = this;
         opmodes = new Vector<>();
         input = new InputHandler(this);
     }
