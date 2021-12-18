@@ -5,8 +5,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 @Config
 @Autonomous(name = "TFOD_TEST", group = "Test")
@@ -35,27 +41,69 @@ public class TFODTesting extends OpMode {
      */
     private TFObjectDetector tfod;
 
+    //object recognition variables
+    private int objsListSize = 0;
+    private HashMap<String, Boolean> objHMDetected;
+
     @Override
     public void init() {
         initVuforia();
         initTensorFlow();
+        initObjectRecognitionVariables();
+
+        if (tfod != null) {
+            tfod.activate();
+            tfod.setZoom(1.1, 16.0/9.0);
+        }
     }
+
+
 
     @Override
     public void loop() {
         if (tfod != null) {
-            tfod.activate();
 
-            // The TensorFlow software will scale the input images from the camera to a lower resolution.
-            // This can result in lower detection accuracy at longer distances (> 55cm or 22").
-            // If your target is at distance greater than 50 cm (20") you can adjust the magnification value
-            // to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
-            // should be set to the value of the images used to create the TensorFlow Object Detection model
-            // (typically 16/9).
-            tfod.setZoom(2.5, 16.0/9.0);
+            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+            if (updatedRecognitions != null){
+                objsListSize = updatedRecognitions.size();
+
+                objHMDetected.put(LABELS[0], false); //Ball
+                objHMDetected.put(LABELS[1], false); //Cube
+                objHMDetected.put(LABELS[2], false); //Duck
+                objHMDetected.put(LABELS[3], false); //Marker
+
+                for (Recognition recognition : updatedRecognitions){
+                    if (recognition.getLabel() != null){
+                        String bbLabel = recognition.getLabel().toUpperCase();
+                        switch (bbLabel) {
+                            case "BALL":
+                                objHMDetected.put(LABELS[0], true); //Ball
+                                break;
+                            case "CUBE":
+                                objHMDetected.put(LABELS[1], true); //Ball
+                                break;
+                            case "DUCK":
+                                objHMDetected.put(LABELS[2], true); //Ball
+                                break;
+                            case "MARKER":
+                                objHMDetected.put(LABELS[3], true); //Ball
+                                break;
+                        }
+                    }
+                }
+            }
+
         }
 
+        telemetry.addData("Object List Size: ", objsListSize);
+        telemetry.addData("Objects Detected: ", objHMDetected.toString());
+    }
 
+    @Override
+    public void stop(){
+        if (tfod != null){
+            tfod.shutdown();
+        }
     }
 
     /**
@@ -69,7 +117,10 @@ public class TFODTesting extends OpMode {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraName = hardwareMap.get(WebcamName.class, "MainCam");
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.useExtendedTracking = true;
+        parameters.cameraMonitorFeedback = null;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -85,11 +136,21 @@ public class TFODTesting extends OpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minResultConfidence = 0.8f;
+        tfodParameters.minResultConfidence = 0.69f;
         tfodParameters.isModelTensorFlow2 = true;
         tfodParameters.useObjectTracker = true;
         tfodParameters.inputSize = 320;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+    }
+
+    public void initObjectRecognitionVariables(){
+        objsListSize = 0;
+
+        objHMDetected = new HashMap<>();
+        objHMDetected.put(LABELS[0], false); //Ball
+        objHMDetected.put(LABELS[1], false); //Cube
+        objHMDetected.put(LABELS[2], false); //Duck
+        objHMDetected.put(LABELS[3], false); //Marker
     }
 }
