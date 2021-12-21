@@ -6,8 +6,10 @@ import androidx.annotation.Nullable;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.vuforia.CameraCalibration;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.android.util.Size;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -47,6 +49,9 @@ public class TFODTesting extends OpMode {
      * Detection engine.
      */
     private TFObjectDetector tfod;
+
+    //Very Important variables!!! Camera Properties
+    private int camWidth = 0, camHeight = 0;
 
     //object recognition variables
     private int objsListSize = 0;
@@ -122,6 +127,7 @@ public class TFODTesting extends OpMode {
         telemetry.addData("BBTop: ", bbTop);
         telemetry.addData("BBRight: ", bbRight);
         telemetry.addData("BBBottom: ", bbBottom);
+        telemetry.update();
     }
 
     @Override
@@ -170,6 +176,13 @@ public class TFODTesting extends OpMode {
     }
 
     public void initObjectRecognitionVariables(){
+        //get camera spec (Width and Height of the output camera bitmap)
+        Size s = vuforia.getCameraCalibration().getSize();
+        camWidth = s.getWidth();
+        camHeight = s.getHeight();
+        s = null; //manually delete the variable for some reason
+
+        //See how many objects we detect
         objsListSize = 0;
 
         //Coordinate Lists
@@ -178,6 +191,7 @@ public class TFODTesting extends OpMode {
         bbRight = new ArrayList<>();
         bbBottom = new ArrayList<>();
 
+        //Detection List for Debugging
         objHMDetected = new HashMap<>();
         objHMDetected.put(LABELS[0], false); //Ball
         objHMDetected.put(LABELS[1], false); //Cube
