@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.robot;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -10,8 +13,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.BiConsumer;
 
 @Config
@@ -44,6 +51,7 @@ public class TFODTesting extends OpMode {
     //object recognition variables
     private int objsListSize = 0;
     private HashMap<String, Boolean> objHMDetected;
+    private ArrayList<Float> bbLeft;
 
     @Override
     public void init() {
@@ -61,6 +69,8 @@ public class TFODTesting extends OpMode {
 
     @Override
     public void loop() {
+        bbLeft.clear();
+
         if (tfod != null) {
 
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
@@ -75,6 +85,7 @@ public class TFODTesting extends OpMode {
                 for (Recognition recognition : updatedRecognitions){
                     if (recognition.getLabel() != null){
                         String bbLabel = recognition.getLabel().toUpperCase();
+                        bbLeft.add(recognition.getLeft());
                         switch (bbLabel) {
                             case "BALL":
                                 objHMDetected.put(LABELS[0], true); //Ball
@@ -146,6 +157,7 @@ public class TFODTesting extends OpMode {
 
     public void initObjectRecognitionVariables(){
         objsListSize = 0;
+        bbLeft = new ArrayList<>();
 
         objHMDetected = new HashMap<>();
         objHMDetected.put(LABELS[0], false); //Ball
