@@ -51,7 +51,7 @@ public class TFODTesting extends OpMode {
     //object recognition variables
     private int objsListSize = 0;
     private HashMap<String, Boolean> objHMDetected;
-    private ArrayList<Float> bbLeft;
+    private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates
 
     @Override
     public void init() {
@@ -69,7 +69,11 @@ public class TFODTesting extends OpMode {
 
     @Override
     public void loop() {
+        //clear the lists so it won't overflow memory after a while
         bbLeft.clear();
+        bbTop.clear();
+        bbRight.clear();
+        bbBottom.clear();
 
         if (tfod != null) {
 
@@ -85,7 +89,13 @@ public class TFODTesting extends OpMode {
                 for (Recognition recognition : updatedRecognitions){
                     if (recognition.getLabel() != null){
                         String bbLabel = recognition.getLabel().toUpperCase();
+
+                        //adds the bounding box coordinates to their appropriate lists
                         bbLeft.add(recognition.getLeft());
+                        bbTop.add(recognition.getTop());
+                        bbRight.add(recognition.getRight());
+                        bbBottom.add(recognition.getBottom());
+
                         switch (bbLabel) {
                             case "BALL":
                                 objHMDetected.put(LABELS[0], true); //Ball
@@ -108,6 +118,10 @@ public class TFODTesting extends OpMode {
 
         telemetry.addData("Object List Size: ", objsListSize);
         telemetry.addData("Objects Detected: ", objHMDetected.toString());
+        telemetry.addData("BBLeft: ", bbLeft);
+        telemetry.addData("BBTop: ", bbTop);
+        telemetry.addData("BBRight: ", bbRight);
+        telemetry.addData("BBBottom: ", bbBottom);
     }
 
     @Override
@@ -157,7 +171,12 @@ public class TFODTesting extends OpMode {
 
     public void initObjectRecognitionVariables(){
         objsListSize = 0;
+
+        //Coordinate Lists
         bbLeft = new ArrayList<>();
+        bbTop = new ArrayList<>();
+        bbRight = new ArrayList<>();
+        bbBottom = new ArrayList<>();
 
         objHMDetected = new HashMap<>();
         objHMDetected.put(LABELS[0], false); //Ball
