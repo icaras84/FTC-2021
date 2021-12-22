@@ -4,12 +4,15 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.android.util.Size;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix3f;
+import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,18 +54,26 @@ public class TFODMain extends OpMode {
     //object recognition variables
     private int objsListSize = 0;
     private HashMap<String, Boolean> objHMDetected;
-    private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates
+    private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates for debugging
+    private ArrayList<Vector3f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
+
+    //transforming variables
+    private Matrix3f toNDC = null;
 
     @Override
     public void init() {
+        isBusy = true;
+
         initVuforia();
         initTensorFlow();
         initObjectRecognitionVariables();
 
         if (tfod != null) {
             tfod.activate();
-            tfod.setZoom(1.1, 16.0/9.0);
+            tfod.setZoom(1.0, 16.0/9.0);
         }
+
+        isBusy = false;
     }
 
     @Override
@@ -79,12 +90,14 @@ public class TFODMain extends OpMode {
     public void loop() {
         scan();
 
-        telemetry.addData("Object List Size: ", objsListSize);
-        telemetry.addData("Objects Detected: ", objHMDetected.toString());
-        telemetry.addData("BBLeft: ", bbLeft);
-        telemetry.addData("BBTop: ", bbTop);
-        telemetry.addData("BBRight: ", bbRight);
-        telemetry.addData("BBBottom: ", bbBottom);
+        if (isBusy == false) {
+            telemetry.addData("Object List Size: ", objsListSize);
+            telemetry.addData("Objects Detected: ", objHMDetected.toString());
+            telemetry.addData("BBLeft: ", bbLeft);
+            telemetry.addData("BBTop: ", bbTop);
+            telemetry.addData("BBRight: ", bbRight);
+            telemetry.addData("BBBottom: ", bbBottom);
+        }
     }
 
     @Override
@@ -101,32 +114,38 @@ public class TFODMain extends OpMode {
     public void scan(){
         isBusy = true; //set the state of the scan to busy
 
-        //clear the lists so it won't overflow memory after a while
-        bbLeft.clear();
-        bbTop.clear();
-        bbRight.clear();
-        bbBottom.clear();
-
         if (tfod != null) {
 
-            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-            if (updatedRecognitions != null){
-                objsListSize = updatedRecognitions.size();
+            //clear the lists so it won't overflow memory after a while
+            bbLeft.clear();
+            bbTop.clear();
+            bbRight.clear();
+            bbBottom.clear();
+
+            //get recognitions
+            List<Recognition> tfodRecognitions = tfod.getRecognitions();
+            if (tfodRecognitions != null){
+                objsListSize = tfodRecognitions.size();
 
                 objHMDetected.put(LABELS[0], false); //Ball
                 objHMDetected.put(LABELS[1], false); //Cube
                 objHMDetected.put(LABELS[2], false); //Duck
                 objHMDetected.put(LABELS[3], false); //Marker
 
-                for (Recognition recognition : updatedRecognitions){
+                for (Recognition recognition : tfodRecognitions){
                     if (recognition.getLabel() != null){
                         String bbLabel = recognition.getLabel().toUpperCase();
 
+                        /*
                         //adds the bounding box coordinates to their appropriate lists
                         bbLeft.add(recognition.getLeft());
                         bbTop.add(recognition.getTop());
                         bbRight.add(recognition.getRight());
                         bbBottom.add(recognition.getBottom());
+                        */
+
+                        bbTopLeft.add(toNDC.matMul(new Vector3f(recognition.getLeft(), recognition.getTop(), 1)));
+                        bbBottomRight.add(toNDC.matMul(new Vector3f(recognition.getRight(), recognition.getBottom(), 1)));
 
                         switch (bbLabel) {
                             case "BALL":
@@ -208,6 +227,17 @@ public class TFODMain extends OpMode {
         bbTop = new ArrayList<>();
         bbRight = new ArrayList<>();
         bbBottom = new ArrayList<>();
+
+        //initialize vector list
+        bbTopLeft = new ArrayList<>();
+        bbBottomRight = new ArrayList<>();
+
+        //initialize transforms
+        toNDC = new Matrix3f(new float[]
+                { 2/camWidth,           0, -1,
+                           0, 2/camHeight, -1,
+                           0,           0, 1}
+                );
 
         //Detection List for Debugging
         objHMDetected = new HashMap<>();
