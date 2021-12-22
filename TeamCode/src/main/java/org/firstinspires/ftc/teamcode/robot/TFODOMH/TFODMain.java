@@ -1,12 +1,8 @@
-package org.firstinspires.ftc.teamcode.robot;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+package org.firstinspires.ftc.teamcode.robot.TFODOMH;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.vuforia.CameraCalibration;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.android.util.Size;
@@ -16,16 +12,12 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.function.BiConsumer;
 
 @Config
-@Autonomous(name = "TFOD_TEST", group = "Test")
-public class TFODTesting extends OpMode {
+@Autonomous(name = "TFOD_MAIN", group = "Test")
+public class TFODMain extends OpMode {
 
     //illustration key
     private static final String VUFORIA_KEY = "AV9rwXT/////AAABma+8TAirNkVYosxu9qv0Uz051FVEjKU+nkH+MaIvGuHMijrdgoZYBZwCW2aG8P3+eZecZZPq9UKsZiTHAg73h09NT48122Ui10c8DsPe0Tx5Af6VaBklR898w8xCTdOUa7AlBEOa4KfWX6zDngegeZT5hBLfJKE1tiDmYhJezVDlITIh7SHBv0xBvoQuXhemlzL/OmjrnLuWoKVVW0kLanImI7yra+L8eOCLLp1BBD/Iaq2irZCdvgziZPnMLeTUEO9XUbuW8txq9i51anvlwY8yvMXLvIenNC1xg4KFhMmFzZ8xnpx4nWZZtyRBxaDU99aXm7cQgkVP0VD/eBIDYN4AcB0/Pa7V376m6tRJ5UZh";
@@ -50,6 +42,9 @@ public class TFODTesting extends OpMode {
      */
     private TFObjectDetector tfod;
 
+    //var for isBusy
+    private boolean isBusy = false;
+
     //Very Important variables!!! Camera Properties
     private int camWidth = 0, camHeight = 0;
 
@@ -70,10 +65,42 @@ public class TFODTesting extends OpMode {
         }
     }
 
+    @Override
+    public void init_loop(){
 
+    }
+
+    @Override
+    public void start(){
+
+    }
 
     @Override
     public void loop() {
+        scan();
+
+        telemetry.addData("Object List Size: ", objsListSize);
+        telemetry.addData("Objects Detected: ", objHMDetected.toString());
+        telemetry.addData("BBLeft: ", bbLeft);
+        telemetry.addData("BBTop: ", bbTop);
+        telemetry.addData("BBRight: ", bbRight);
+        telemetry.addData("BBBottom: ", bbBottom);
+    }
+
+    @Override
+    public void stop(){
+        if (tfod != null){
+            tfod.shutdown();
+        }
+    }
+
+    /**
+     * PUBLIC CLASS METHODS UNDER HERE
+     */
+
+    public void scan(){
+        isBusy = true; //set the state of the scan to busy
+
         //clear the lists so it won't overflow memory after a while
         bbLeft.clear();
         bbTop.clear();
@@ -121,21 +148,13 @@ public class TFODTesting extends OpMode {
 
         }
 
-        telemetry.addData("Object List Size: ", objsListSize);
-        telemetry.addData("Objects Detected: ", objHMDetected.toString());
-        telemetry.addData("BBLeft: ", bbLeft);
-        telemetry.addData("BBTop: ", bbTop);
-        telemetry.addData("BBRight: ", bbRight);
-        telemetry.addData("BBBottom: ", bbBottom);
-        telemetry.update();
+        isBusy = false; //set the state of the scan to be not busy since it's finished
     }
 
-    @Override
-    public void stop(){
-        if (tfod != null){
-            tfod.shutdown();
-        }
-    }
+
+    /**
+     * INITIALIZERS UNDER HERE
+     */
 
     /**
      * Initializes Vuforia for us to use
@@ -150,7 +169,7 @@ public class TFODTesting extends OpMode {
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraName = hardwareMap.get(WebcamName.class, "MainCam");
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        parameters.useExtendedTracking = true;
+        parameters.useExtendedTracking = false;
         parameters.cameraMonitorFeedback = null;
 
         //  Instantiate the Vuforia engine
@@ -180,7 +199,6 @@ public class TFODTesting extends OpMode {
         Size s = vuforia.getCameraCalibration().getSize();
         camWidth = s.getWidth();
         camHeight = s.getHeight();
-        s = null; //manually delete the variable for some reason
 
         //See how many objects we detect
         objsListSize = 0;
@@ -197,5 +215,17 @@ public class TFODTesting extends OpMode {
         objHMDetected.put(LABELS[1], false); //Cube
         objHMDetected.put(LABELS[2], false); //Duck
         objHMDetected.put(LABELS[3], false); //Marker
+    }
+
+    /**
+     * GETTERS AND SETTERS HERE
+     */
+
+    /**
+     * Checks if this class, TFODTesting, is busy with an action
+     * @return boolean isBusy
+     */
+    public boolean isBusy(){
+        return isBusy;
     }
 }
