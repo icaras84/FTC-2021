@@ -57,9 +57,6 @@ public class TFODMain extends OpMode {
     private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates for debugging
     private ArrayList<Vector3f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
 
-    //transforming variables
-    private Matrix3f toNDC = null;
-
     @Override
     public void init() {
         isBusy = true;
@@ -97,6 +94,8 @@ public class TFODMain extends OpMode {
             telemetry.addData("BBTop: ", bbTop);
             telemetry.addData("BBRight: ", bbRight);
             telemetry.addData("BBBottom: ", bbBottom);
+            telemetry.addData("BBTOPLEFT: ", bbTopLeft);
+            telemetry.addData("BBBOTRIGHT: ", bbBottomRight);
         }
     }
 
@@ -121,6 +120,8 @@ public class TFODMain extends OpMode {
             bbTop.clear();
             bbRight.clear();
             bbBottom.clear();
+            bbTopLeft.clear();
+            bbBottomRight.clear();
 
             //get recognitions
             List<Recognition> tfodRecognitions = tfod.getRecognitions();
@@ -136,16 +137,17 @@ public class TFODMain extends OpMode {
                     if (recognition.getLabel() != null){
                         String bbLabel = recognition.getLabel().toUpperCase();
 
-                        /*
+
                         //adds the bounding box coordinates to their appropriate lists
                         bbLeft.add(recognition.getLeft());
                         bbTop.add(recognition.getTop());
                         bbRight.add(recognition.getRight());
                         bbBottom.add(recognition.getBottom());
-                        */
 
-                        bbTopLeft.add(toNDC.matMul(new Vector3f(recognition.getLeft(), recognition.getTop(), 1)));
-                        bbBottomRight.add(toNDC.matMul(new Vector3f(recognition.getRight(), recognition.getBottom(), 1)));
+                        Vector3f normalizedTL = new Vector3f(recognition.getLeft() / camWidth, recognition.getTop() / camHeight, 1);
+                        Vector3f normalizedBR = new Vector3f(recognition.getRight() / camWidth, recognition.getBottom() / camHeight, 1);
+                        bbTopLeft.add(normalizedTL);
+                        bbBottomRight.add(normalizedBR);
 
                         switch (bbLabel) {
                             case "BALL":
@@ -231,13 +233,6 @@ public class TFODMain extends OpMode {
         //initialize vector list
         bbTopLeft = new ArrayList<>();
         bbBottomRight = new ArrayList<>();
-
-        //initialize transforms
-        toNDC = new Matrix3f(new float[]
-                { 2/camWidth,           0, -1,
-                           0, 2/camHeight, -1,
-                           0,           0, 1}
-                );
 
         //Detection List for Debugging
         objHMDetected = new HashMap<>();
