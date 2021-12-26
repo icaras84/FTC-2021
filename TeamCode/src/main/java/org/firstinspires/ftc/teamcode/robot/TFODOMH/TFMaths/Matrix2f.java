@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths;
 
+import java.io.IOException;
+
 public class Matrix2f {
 
     private float[] m;
@@ -12,6 +14,9 @@ public class Matrix2f {
     public Matrix2f(float[] matrix){
         if (matrix.length == 4) {
             m = matrix;
+        } else {
+            IOException e = new IOException("Array length is not 4!");
+            e.printStackTrace();
         }
     }
 

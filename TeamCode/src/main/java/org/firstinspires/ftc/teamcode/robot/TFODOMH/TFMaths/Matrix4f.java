@@ -19,7 +19,7 @@ public class Matrix4f {
         if (newMatrix.length == 16){
             m = newMatrix;
         } else {
-            IOException e = new IOException("Matrix Length is not 9!");
+            IOException e = new IOException("Matrix Length is not 16!");
             e.printStackTrace();
         }
     }
