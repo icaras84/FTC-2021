@@ -35,7 +35,7 @@ public class TFMathExtension {
      * @param value
      * @return
      */
-    public float clamp(float min, float max, float value){
+    public static float clamp(float min, float max, float value){
         return Math.min(max, Math.max(min, value));
     }
 
@@ -48,7 +48,7 @@ public class TFMathExtension {
      * @param l4
      * @return new Vector3f(ix, iy, 1);
      */
-    public Vector3f llInt2d(Vector3f l1, Vector3f l2, Vector3f l3, Vector3f l4){
+    public static Vector3f llInt2d(Vector3f l1, Vector3f l2, Vector3f l3, Vector3f l4){
         float x1 = l1.getX();
         float x2 = l2.getX();
 
@@ -80,26 +80,45 @@ public class TFMathExtension {
 
     /**
      * returns the determinant of a 4 length array without casting it into a Matrix2f object
+     * <br> [a,b] is arranged like {a, b, c, d} in a 1d array
+     * <br> [c,d]
+     *
      * @param a
-     * @return a[0] * a[3] - a[1] * a[2]
+     * @return a * c - b * d
      */
-    public float quick2fArrDet(float[] a){
+    public static float quick2fArrDet(float[] a){
         return a[0] * a[3] - a[1] * a[2];
     }
 
     /**
-     * bypass using Vector3f length method
+     * returns the determinant of a 9 length array without casting it into a Matrix3f object
+     * <br> [a,b,c] is arranged like {a, b, c, d, e, f, g, h, i} in a 1d array
+     * <br> [d,e,f]
+     * <br> [g,h,i]
+     *
+     * @param a
+     * @return a * |e,f,h,i| - b * |d,f,g,i| + c * |d,e,g,h|
+     */
+    public static float quick3fArrDet(float[] a){
+        float[] min1 = {a[4], a[5], a[7], a[8]};
+        float[] min2 = {a[3], a[5], a[6], a[8]};
+        float[] min3 = {a[3], a[4], a[6], a[7]};
+        return quick2fArrDet(min1) * a[0] - quick2fArrDet(min2) * a[1] + quick2fArrDet(min3) * a[2];
+    }
+
+    /**
+     * bypass using Vector2f length method
      * @return float length
      */
-    public float quickLengthF(float x1, float y1, float x2, float y2){
+    public static float quickLengthF(float x1, float y1, float x2, float y2){
         return (float) Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) - (y2 - y1)));
     }
 
     /**
-     * bypass using Vector3f length method
+     * bypass using Vector2f length method
      * @return double length
      */
-    public double quickLengthD(float x1, float y1, float x2, float y2){
+    public static double quickLengthD(float x1, float y1, float x2, float y2){
         return Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) - (y2 - y1)));
     }
 }

@@ -92,6 +92,7 @@ public class Matrix3f {
     }
 
     public void invert(){
+        if (this.det() == 0){return;}
         float det_inv = 1 / this.det();
 
         float[] cofactor_mat = new float[] {
@@ -183,10 +184,6 @@ public class Matrix3f {
         float det = minor_mat[0] * minor_mat[3] - minor_mat[1] * minor_mat[2];
 
         return det;
-    }
-
-    public Matrix3f getAsCofactor(){
-        return new Matrix3f(new float[]{m[0], -m[1], m[2], -m[3], m[4], -m[5], m[6], m[7], m[8]});
     }
 
     public float[] getAsFloatArray(){

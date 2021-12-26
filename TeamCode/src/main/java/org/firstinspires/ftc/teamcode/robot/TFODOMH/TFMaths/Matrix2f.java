@@ -57,7 +57,7 @@ public class Matrix2f {
         return new Matrix2f(new float[]{ m[3]/det, -m[1]/det, -m[2]/det, m[1]/det});
     }
 
-    public void inverse(){
+    public void invert(){
         float det = this.det();
         if (det == 0){return;}
         float[] nm = {m[3]/det, -m[1]/det, -m[2]/det, m[0]/det};
