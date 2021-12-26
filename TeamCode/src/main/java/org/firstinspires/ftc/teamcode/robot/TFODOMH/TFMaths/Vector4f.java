@@ -123,4 +123,7 @@ public class Vector4f {
     public static float dot(Vector4f a, Vector4f b){
         return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
     }
+
+    @Override
+    public String toString(){ return ("X: " + this.x + " Y: " + this.y + " Z: " + this.z + " W: " + this.w);}
 }
