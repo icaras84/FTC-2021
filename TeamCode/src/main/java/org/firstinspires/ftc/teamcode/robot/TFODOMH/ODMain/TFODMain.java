@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot.TFODOMH;
+package org.firstinspires.ftc.teamcode.robot.TFODOMH.ODMain;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix3f;
+import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector3f;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class TFODMain extends OpMode {
     private int objsListSize = 0;
     private HashMap<String, Boolean> objHMDetected;
     private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates for debugging
-    private ArrayList<Vector3f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
+    private ArrayList<Vector2f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
 
     @Override
     public void init() {
@@ -110,6 +111,9 @@ public class TFODMain extends OpMode {
      * PUBLIC CLASS METHODS UNDER HERE
      */
 
+    /**
+     * This method rescans the image for objects when called for flexibility
+     */
     public void scan(){
         isBusy = true; //set the state of the scan to busy
 
@@ -144,8 +148,8 @@ public class TFODMain extends OpMode {
                         bbRight.add(recognition.getRight());
                         bbBottom.add(recognition.getBottom());
 
-                        Vector3f normalizedTL = new Vector3f(recognition.getLeft() / camWidth, recognition.getTop() / camHeight, 1);
-                        Vector3f normalizedBR = new Vector3f(recognition.getRight() / camWidth, recognition.getBottom() / camHeight, 1);
+                        Vector2f normalizedTL = new Vector2f(recognition.getLeft() / camWidth * 2 - 1, recognition.getTop() / camHeight * 2 - 1);
+                        Vector2f normalizedBR = new Vector2f(recognition.getRight() / camWidth * 2 - 1, recognition.getBottom() / camHeight * 2 - 1);
                         bbTopLeft.add(normalizedTL);
                         bbBottomRight.add(normalizedBR);
 
@@ -172,6 +176,48 @@ public class TFODMain extends OpMode {
         isBusy = false; //set the state of the scan to be not busy since it's finished
     }
 
+    /**
+     * Calculates the center of the bounding boxes and find which are the closest to the center of screen space
+     * @return closest Vector2f to the center of the image
+     */
+    public Vector2f calculateBBVector(){
+        isBusy = true;
+        //check for null pointers because those are always sneaky
+        if ((bbTopLeft.size() != 0 && bbTopLeft != null) && (bbBottomRight.size() != 0 && bbBottomRight != null)){
+
+            int loop_len = Math.min(bbTopLeft.size(), bbBottomRight.size()); //you can't guarantee the sizes are going to be the same, so as a precaution, I threw this here to prevent IndexOutOfArrayBounds exceptions
+            float previous_len = 2; //length from the center, plus we are working in NDC space so the bounds for both x and y are between -1 & 1
+            Vector2f temp_tl, temp_br, center, closest = new Vector2f(0, 0); //allocate mem to these objects so I don't have to repeat the creation of an object in the for loop; also instantiate closest just in case somehow one of the elements is null
+
+            for (int i = 0; i < loop_len; i++){
+                //store the Vector2f gotten from the arraylist to avoid accidental mutation
+                temp_tl = bbTopLeft.get(i);
+                temp_br = bbBottomRight.get(i);
+
+                //check for null element, but this is probably redundant
+                if (temp_tl != null && temp_br != null) {
+                    //find the center of the bounding box
+                    center = Vector2f.add(temp_tl, temp_br);
+                    center.div(2);
+
+                    //if center length is amazing and closest to the center, we overwrite closest and previous_len with center and center.length() respectively
+                    if (center.length() < previous_len) {
+                        previous_len = center.length();
+                        closest = center;
+                    }
+                }
+            }
+
+            isBusy = false;
+            return closest; //returns closest Vector2f to be processed as a Vector3f later to find depth then local space coordinates
+        } else {
+            telemetry.log().add("Null? [bbTopLeft, bbBottomRight]: ", "[" + (bbTopLeft == null) + ", " + (bbBottomRight == null) + "]");
+        }
+
+        isBusy = false;
+        return new Vector2f(0, -1); //if we can't find the closest, don't move anyways, which is (0, -1), the closest local space coordinate to the bot
+    }
+
 
     /**
      * INITIALIZERS UNDER HERE
@@ -196,7 +242,7 @@ public class TFODMain extends OpMode {
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
-        // Loading trackables is not necessary for the TensorFlow Object Detection engine.
+        // Loading trackable is not necessary for the TensorFlow Object Detection engine.
     }
 
     /**

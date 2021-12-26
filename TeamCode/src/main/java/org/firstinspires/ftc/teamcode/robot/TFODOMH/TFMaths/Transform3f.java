@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths;
 
-public class Transform {
+public class Transform3f {
 
     private Matrix3f localRotation, localTranslation, localTransform;
     private Matrix3f globalRotation, globalTranslation, globalTransform;
 
     //default the matrices to identity matrices on construction of the object
-    public Transform(){
+    public Transform3f(){
         localRotation = new Matrix3f();
         localTranslation = new Matrix3f();
         localTransform = new Matrix3f();
@@ -72,5 +72,13 @@ public class Transform {
         this.localTransform = Matrix3f.matMul(gPos, gRot);
     }
 
+    //get the local matrices
+    public Matrix3f getLocalTranslation(){ return this.localTranslation; }
+    public Matrix3f getLocalRotation() { return localRotation; }
+    public Matrix3f getLocalTransform() { return localTransform; }
 
+    //get the global matrices
+    public Matrix3f getGlobalTranslation() { return globalTranslation; }
+    public Matrix3f getGlobalRotation() { return globalRotation; }
+    public Matrix3f getGlobalTransform() { return globalTransform; }
 }
