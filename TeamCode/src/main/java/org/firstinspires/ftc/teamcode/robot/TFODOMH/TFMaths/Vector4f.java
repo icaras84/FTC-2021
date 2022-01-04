@@ -124,6 +124,10 @@ public class Vector4f {
         return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
     }
 
+    public Vector3f getAsVec3f(){
+        return new Vector3f(this.x, this.y, this.z);
+    }
+
     @Override
     public String toString(){ return ("X: " + this.x + " Y: " + this.y + " Z: " + this.z + " W: " + this.w);}
 }
