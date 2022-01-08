@@ -66,7 +66,7 @@ public class FrustumInterpolator {
 
         fplane_right = camRot.matMul(new Vector4f((float) Math.tan(1/2 * hFOV) * fpDistance, 0, 0, 1));
         fplane_bottom = camRot.matMul(new Vector4f(0, (float) -Math.tan(1/2 * vFOV) * fpDistance, 0, 1));
-        fplane_center = camRot.matMul(new Vector4f(0, 0, fpDistance, 1));
+        fplane_center = camRot.matMul(new Vector4f(0, 0, 1, 1));
 
         imgToLocal = new Matrix4f(new float[]
                 {fplane_right.getX(), fplane_bottom.getX(), fplane_center.getX(), camPos.getX(),

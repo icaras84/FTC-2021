@@ -131,10 +131,14 @@ public class TFMathExtension {
      * @return
      */
     public static double[] convertDFov(double dFov, int width, int height){
-        double hFov, vFov, ar;
-        ar = height / width;
-        hFov = 2 * Math.atan(Math.tan(Math.toRadians(dFov)) * Math.cos(Math.atan(ar)));
-        vFov = 2 * Math.atan(Math.tan(Math.toRadians(dFov)) * Math.sin(Math.atan(ar)));
+        double hFov, vFov, dfov_radians, car, sar;
+        dfov_radians = dFov * Math.PI/180;
+
+        car = Math.cos(Math.atan2(height, width));
+        sar = Math.sin(Math.atan2(height, width));
+
+        hFov = 2 * Math.atan(car * Math.tan(dfov_radians)) * 180/Math.PI;
+        vFov = 2 * Math.atan(sar * Math.tan(dfov_radians)) * 180/Math.PI;
 
         return new double[] {hFov, vFov};
     }

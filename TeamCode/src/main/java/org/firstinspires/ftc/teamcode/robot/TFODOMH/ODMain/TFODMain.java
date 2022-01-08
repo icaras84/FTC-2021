@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix3f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix4fBuilder;
+import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.TFMathExtension;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector3f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector4f;
@@ -99,8 +100,9 @@ public class TFODMain extends OpMode {
     public void loop() {
         scan();
         Vector2f bb = calculateBBVector();
-
-        local_pos = l270.convertIMGCoord(new Vector4f(bb.getX(), bb.getY(), 0, 1));
+        if (bb.getY() == -2) {
+            local_pos = l270.convertIMGCoord(new Vector4f(bb.getX(), bb.getY(), 0, 1));
+        }
 
         if (isBusy == false) {
             telemetry.addData("Object List Size: ", objsListSize);
@@ -111,7 +113,11 @@ public class TFODMain extends OpMode {
             telemetry.addData("BBBottom: ", bbBottom);
             telemetry.addData("BBTOPLEFT: ", bbTopLeft);
             telemetry.addData("BBBOTRIGHT: ", bbBottomRight);
-            telemetry.addData("Closest to Center: ", local_pos);
+            telemetry.addData("Null? [bbTopLeft, bbBottomRight]: ", "[" + (bbTopLeft == null) + ", " + (bbBottomRight == null) + "]");
+            telemetry.addData("BBClosest: ", bb);
+            telemetry.addData("BB to Local: ", local_pos);
+            telemetry.addData("DFOV to HFOV: ", TFMathExtension.convertDFov(55, 16, 9)[0]);
+            telemetry.addData("DFOV to VFOV: ", TFMathExtension.convertDFov(55, 16, 9)[1]);
         }
     }
 
@@ -156,7 +162,6 @@ public class TFODMain extends OpMode {
                     if (recognition.getLabel() != null){
                         String bbLabel = recognition.getLabel().toUpperCase();
 
-
                         //adds the bounding box coordinates to their appropriate lists
                         bbLeft.add(recognition.getLeft());
                         bbTop.add(recognition.getTop());
@@ -165,18 +170,23 @@ public class TFODMain extends OpMode {
 
                         Vector2f normalizedTL = new Vector2f(recognition.getLeft() / camWidth * 2 - 1, recognition.getTop() / camHeight * 2 - 1);
                         Vector2f normalizedBR = new Vector2f(recognition.getRight() / camWidth * 2 - 1, recognition.getBottom() / camHeight * 2 - 1);
-                        bbTopLeft.add(normalizedTL);
-                        bbBottomRight.add(normalizedBR);
+
 
                         switch (bbLabel) {
                             case "BALL":
                                 objHMDetected.put(LABELS[0], true); //Ball
+                                bbTopLeft.add(normalizedTL);
+                                bbBottomRight.add(normalizedBR);
                                 break;
                             case "CUBE":
                                 objHMDetected.put(LABELS[1], true); //Ball
+                                bbTopLeft.add(normalizedTL);
+                                bbBottomRight.add(normalizedBR);
                                 break;
                             case "DUCK":
                                 objHMDetected.put(LABELS[2], true); //Ball
+                                bbTopLeft.add(normalizedTL);
+                                bbBottomRight.add(normalizedBR);
                                 break;
                             case "MARKER":
                                 objHMDetected.put(LABELS[3], true); //Ball
@@ -225,12 +235,10 @@ public class TFODMain extends OpMode {
 
             isBusy = false;
             return closest; //returns closest Vector2f to be processed as a Vector3f later to find depth then local space coordinates
-        } else {
-            telemetry.log().add("Null? [bbTopLeft, bbBottomRight]: ", "[" + (bbTopLeft == null) + ", " + (bbBottomRight == null) + "]");
         }
 
         isBusy = false;
-        return new Vector2f(0, -1); //if we can't find the closest, don't move anyways, which is (0, -1), the closest local space coordinate to the bot
+        return new Vector2f(0, -2); //if we can't find the nearest, return a vector out of bounds
     }
 
 
