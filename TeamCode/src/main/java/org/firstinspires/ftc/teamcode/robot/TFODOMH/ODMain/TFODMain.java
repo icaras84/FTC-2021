@@ -29,6 +29,7 @@ public class TFODMain extends OpMode {
     //illustration key
     private static final String VUFORIA_KEY = "AV9rwXT/////AAABma+8TAirNkVYosxu9qv0Uz051FVEjKU+nkH+MaIvGuHMijrdgoZYBZwCW2aG8P3+eZecZZPq9UKsZiTHAg73h09NT48122Ui10c8DsPe0Tx5Af6VaBklR898w8xCTdOUa7AlBEOa4KfWX6zDngegeZT5hBLfJKE1tiDmYhJezVDlITIh7SHBv0xBvoQuXhemlzL/OmjrnLuWoKVVW0kLanImI7yra+L8eOCLLp1BBD/Iaq2irZCdvgziZPnMLeTUEO9XUbuW8txq9i51anvlwY8yvMXLvIenNC1xg4KFhMmFzZ8xnpx4nWZZtyRBxaDU99aXm7cQgkVP0VD/eBIDYN4AcB0/Pa7V376m6tRJ5UZh";
 
+    //load assets and initialize labelling
     private static final String TFOD_MODEL_ASSET = "FreightFrenzy_BCDM.tflite";
     private static final String[] LABELS = {
             "Ball",
@@ -49,11 +50,16 @@ public class TFODMain extends OpMode {
      */
     private TFObjectDetector tfod;
 
+    private static final String CAMERA_NAME = "MainCam";
+
     //var for isBusy
     private boolean isBusy = false;
 
-    //Very Important variables!!! Camera Properties
-    private int camWidth = 0, camHeight = 0;
+    //Enable debug?
+    private boolean debug = true;
+
+    //image properties of the camera feed
+    private int imgWidth = 0, imgHeight = 0;
 
     //object recognition variables
     private int objsListSize = 0;
@@ -62,8 +68,10 @@ public class TFODMain extends OpMode {
     private ArrayList<Vector2f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
     private Vector3f local_pos = new Vector3f();
 
-    //Define Camera itself
+    //object to describe the camera frustum
     private FrustumInterpolator l270;
+
+    public TFODMain(){init();}
 
     @Override
     public void init() {
@@ -78,10 +86,10 @@ public class TFODMain extends OpMode {
             tfod.setZoom(1.0, 16.0/9.0);
         }
 
-        l270 = FrustumInterpolator.Logitech_C270;
+        l270 = FrustumInterpolator.Logitech_C270; //get preset for the Logitech C270 webcam that includes the FOV for both Vertical & Horizontal
 
-        l270.setCamPos(new Vector3f(3.8f, 7.4f, 6.8f));
-        l270.setCamRot(Matrix4fBuilder.buildGenRot(325, 0, 180));
+        l270.setCamPos(new Vector3f(3.8f, 7.4f, 6.8f)); //describe the position of the camera ***lens***
+        l270.setCamRot(Matrix4fBuilder.buildGenRot(325, 0, 180)); //describe the rotation of the camera ***lens***
         l270.setupFrustum();
 
         isBusy = false;
@@ -102,10 +110,10 @@ public class TFODMain extends OpMode {
         scan();
         Vector2f bb = calculateBBVector();
         if (bb.getY() == -2) {
-            local_pos = l270.convertIMGCoord(new Vector4f(bb.getX(), bb.getY(), 1, 1));
+            local_pos = l270.convertIMGCoord(bb);
         }
 
-        if (isBusy == false) {
+        if (isBusy == false && debug == true) {
             telemetry.addData("Object List Size: ", objsListSize);
             telemetry.addData("Objects Detected: ", objHMDetected.toString());
             telemetry.addData("BBLeft: ", bbLeft);
@@ -138,7 +146,7 @@ public class TFODMain extends OpMode {
      */
 
     /**
-     * This method rescans the image for objects when called for flexibility
+     * This method rescans the image for objects when called for flexibility if you aren't happy with loop()
      */
     public void scan(){
         isBusy = true; //set the state of the scan to busy
@@ -173,10 +181,11 @@ public class TFODMain extends OpMode {
                         bbRight.add(recognition.getRight());
                         bbBottom.add(recognition.getBottom());
 
-                        Vector2f normalizedTL = new Vector2f(recognition.getLeft() / camWidth * 2 - 1, recognition.getTop() / camHeight * 2 - 1);
-                        Vector2f normalizedBR = new Vector2f(recognition.getRight() / camWidth * 2 - 1, recognition.getBottom() / camHeight * 2 - 1);
+                        Vector2f normalizedTL = new Vector2f(recognition.getLeft() / imgWidth * 2 - 1, recognition.getTop() / imgHeight * 2 - 1);
+                        Vector2f normalizedBR = new Vector2f(recognition.getRight() / imgWidth * 2 - 1, recognition.getBottom() / imgHeight * 2 - 1);
 
 
+                        //identify the recognized object, sets the detection status for all of them
                         switch (bbLabel) {
                             case "BALL":
                                 objHMDetected.put(LABELS[0], true); //Ball
@@ -184,17 +193,17 @@ public class TFODMain extends OpMode {
                                 bbBottomRight.add(normalizedBR);
                                 break;
                             case "CUBE":
-                                objHMDetected.put(LABELS[1], true); //Ball
+                                objHMDetected.put(LABELS[1], true); //Cube
                                 bbTopLeft.add(normalizedTL);
                                 bbBottomRight.add(normalizedBR);
                                 break;
                             case "DUCK":
-                                objHMDetected.put(LABELS[2], true); //Ball
+                                objHMDetected.put(LABELS[2], true); //Duck
                                 bbTopLeft.add(normalizedTL);
                                 bbBottomRight.add(normalizedBR);
                                 break;
                             case "MARKER":
-                                objHMDetected.put(LABELS[3], true); //Ball
+                                objHMDetected.put(LABELS[3], true); //Market
                                 break;
                         }
                     }
@@ -262,7 +271,7 @@ public class TFODMain extends OpMode {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraName = hardwareMap.get(WebcamName.class, "MainCam");
+        parameters.cameraName = hardwareMap.get(WebcamName.class, TFODMain.CAMERA_NAME);
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         parameters.useExtendedTracking = false;
         parameters.cameraMonitorFeedback = null;
@@ -289,11 +298,14 @@ public class TFODMain extends OpMode {
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
 
+    /**
+     * Initialize a few important variables, such as: bounding box position, image properties, obj recognition lists, etc.
+     */
     public void initObjectRecognitionVariables(){
         //get camera spec (Width and Height of the output camera bitmap)
         Size s = vuforia.getCameraCalibration().getSize();
-        camWidth = s.getWidth();
-        camHeight = s.getHeight();
+        imgWidth = s.getWidth();
+        imgHeight = s.getHeight();
 
         //See how many objects we detect
         objsListSize = 0;
@@ -321,7 +333,7 @@ public class TFODMain extends OpMode {
      */
 
     /**
-     * Checks if this class, TFODTesting, is busy with an action
+     * Checks if this class is busy with an action
      * @return boolean isBusy
      */
     public boolean isBusy(){

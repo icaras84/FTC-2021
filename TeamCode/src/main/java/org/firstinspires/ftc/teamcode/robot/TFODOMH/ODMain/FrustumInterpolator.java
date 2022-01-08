@@ -1,20 +1,15 @@
 package org.firstinspires.ftc.teamcode.robot.TFODOMH.ODMain;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix4f;
-import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix4fBuilder;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Plane3f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.TFMathExtension;
-import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Transform4f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector3f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector4f;
 
+/**
+ * This class simulates the viewable space of a camera
+ */
 public class FrustumInterpolator {
 
     private Matrix4f imgToLocal = null; //camera matrix will be used to modify frustum coordinates in local space
@@ -62,6 +57,10 @@ public class FrustumInterpolator {
         this.setupFrustum();
     }
 
+    /**
+     * Usually a method called in the constructor and setters to update the matrices used
+     * <br> However, this method is available because this class doesn't work with MOMM
+     */
     public void setupFrustum(){
         double angV = Math.toRadians(vFOV) / 2;
         double angH = Math.toRadians(hFOV) / 2;
@@ -82,13 +81,28 @@ public class FrustumInterpolator {
                 );
     }
 
+    /**
+     * This converts the given Bounding Box coordinate passed with a 2d vector into a 3d coordinate on the XZ plane
+     * @param bb_pos
+     * @return XZ & bb_pos intersection
+     */
+    public Vector3f convertIMGCoord(Vector2f bb_pos){
+        Vector3f output = this.cardinalAxisPlane.getVector3fInt(camPos, this.imgToLocal.matMul(new Vector4f(bb_pos.getX(), bb_pos.getY(), 1, 1)).getAsVec3f());
+        return output;
+    }
+
+    /**
+     * This converts the given Bounding Box coordinate passed with a 2d vector into a 3d coordinate on the XZ plane (4D input version)
+     * @param bb_pos
+     * @return XZ & bb_pos intersection
+     */
     public Vector3f convertIMGCoord(Vector4f bb_pos){
         Vector3f output = this.cardinalAxisPlane.getVector3fInt(camPos, this.imgToLocal.matMul(bb_pos).getAsVec3f());
         return output;
     }
 
     /**
-     * SETTERS AND GETTERS
+     * GETTERS AND SETTERS
      */
 
     public void setCamRot(Matrix4f newRotation){
