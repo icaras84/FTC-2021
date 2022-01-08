@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix3f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix4fBuilder;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector3f;
+import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +59,7 @@ public class TFODMain extends OpMode {
     private HashMap<String, Boolean> objHMDetected;
     private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates for debugging
     private ArrayList<Vector2f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
+    private Vector3f local_pos = new Vector3f();
 
     //Define Camera itself
     private FrustumInterpolator l270;
@@ -96,6 +98,9 @@ public class TFODMain extends OpMode {
     @Override
     public void loop() {
         scan();
+        Vector2f bb = calculateBBVector();
+
+        local_pos = l270.convertIMGCoord(new Vector4f(bb.getX(), bb.getY(), 0, 1));
 
         if (isBusy == false) {
             telemetry.addData("Object List Size: ", objsListSize);
@@ -106,6 +111,7 @@ public class TFODMain extends OpMode {
             telemetry.addData("BBBottom: ", bbBottom);
             telemetry.addData("BBTOPLEFT: ", bbTopLeft);
             telemetry.addData("BBBOTRIGHT: ", bbBottomRight);
+            telemetry.addData("Closest to Center: ", local_pos);
         }
     }
 
