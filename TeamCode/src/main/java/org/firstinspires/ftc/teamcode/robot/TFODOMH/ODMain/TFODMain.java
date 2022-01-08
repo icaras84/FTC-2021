@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix3f;
+import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix4fBuilder;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector3f;
 
@@ -58,6 +59,9 @@ public class TFODMain extends OpMode {
     private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates for debugging
     private ArrayList<Vector2f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
 
+    //Define Camera itself
+    private FrustumInterpolator l270;
+
     @Override
     public void init() {
         isBusy = true;
@@ -70,6 +74,11 @@ public class TFODMain extends OpMode {
             tfod.activate();
             tfod.setZoom(1.0, 16.0/9.0);
         }
+
+        l270 = FrustumInterpolator.Logitech_C270;
+
+        l270.setCamPos(new Vector3f(3.8f, 7.4f, 6.8f));
+        l270.setCamRot(Matrix4fBuilder.buildGenRot(-35, 0, 0));
 
         isBusy = false;
     }

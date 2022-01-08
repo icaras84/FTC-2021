@@ -121,4 +121,21 @@ public class TFMathExtension {
     public static double quickLengthD(float x1, float y1, float x2, float y2){
         return Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) - (y2 - y1)));
     }
+
+    /**
+     * This method converts the given diagonal, width, and height measurements
+     * <br> Courtesy of <a href="https://learnopencv.com/approximate-focal-length-for-webcams-and-cell-phone-cameras/#value">OpenCV</a>
+     * @param dFov
+     * @param width
+     * @param height
+     * @return
+     */
+    public static double[] convertDFov(double dFov, int width, int height){
+        double hFov, vFov, ar;
+        ar = height / width;
+        hFov = 2 * Math.atan(Math.tan(Math.toRadians(dFov)) * Math.cos(Math.atan(ar)));
+        vFov = 2 * Math.atan(Math.tan(Math.toRadians(dFov)) * Math.sin(Math.atan(ar)));
+
+        return new double[] {hFov, vFov};
+    }
 }
