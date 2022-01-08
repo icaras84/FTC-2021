@@ -81,7 +81,8 @@ public class TFODMain extends OpMode {
         l270 = FrustumInterpolator.Logitech_C270;
 
         l270.setCamPos(new Vector3f(3.8f, 7.4f, 6.8f));
-        l270.setCamRot(Matrix4fBuilder.buildGenRot(-35, 0, 0));
+        l270.setCamRot(Matrix4fBuilder.buildGenRot(325, 0, 180));
+        l270.setupFrustum();
 
         isBusy = false;
     }
@@ -101,7 +102,7 @@ public class TFODMain extends OpMode {
         scan();
         Vector2f bb = calculateBBVector();
         if (bb.getY() == -2) {
-            local_pos = l270.convertIMGCoord(new Vector4f(bb.getX(), bb.getY(), 0, 1));
+            local_pos = l270.convertIMGCoord(new Vector4f(bb.getX(), bb.getY(), 1, 1));
         }
 
         if (isBusy == false) {
@@ -116,8 +117,12 @@ public class TFODMain extends OpMode {
             telemetry.addData("Null? [bbTopLeft, bbBottomRight]: ", "[" + (bbTopLeft == null) + ", " + (bbBottomRight == null) + "]");
             telemetry.addData("BBClosest: ", bb);
             telemetry.addData("BB to Local: ", local_pos);
-            telemetry.addData("DFOV to HFOV: ", TFMathExtension.convertDFov(55, 16, 9)[0]);
-            telemetry.addData("DFOV to VFOV: ", TFMathExtension.convertDFov(55, 16, 9)[1]);
+            telemetry.addData("Cam HFOV: ", l270.gethFOV());
+            telemetry.addData("Cam VFOV: ", l270.getvFOV());
+            telemetry.addData("Bottom: ", l270.getFplane_bottom());
+            telemetry.addData("Right:", l270.getFplane_right());
+            telemetry.addData("Center: ", l270.getFplane_center());
+            telemetry.addData("Cam Rot Matrix: ", l270.getCamRot());
         }
     }
 

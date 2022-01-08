@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.robot.TFODOMH.ODMain;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix4f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix4fBuilder;
@@ -17,6 +22,7 @@ public class FrustumInterpolator {
 
     private double hFOV, vFOV; //horizontal and vertical fov, important for calculating the frustum later
     private Vector4f fplane_right = new Vector4f(), fplane_bottom = new Vector4f(), fplane_center = new Vector4f();
+
     private Vector3f camPos = new Vector3f();
     private Plane3f cardinalAxisPlane = Plane3f.X_PLANE;
 
@@ -56,7 +62,7 @@ public class FrustumInterpolator {
         this.setupFrustum();
     }
 
-    private void setupFrustum(){
+    public void setupFrustum(){
         double angV = Math.toRadians(vFOV) / 2;
         double angH = Math.toRadians(hFOV) / 2;
 
@@ -64,9 +70,9 @@ public class FrustumInterpolator {
 
         Vector3f temp = this.camPos;
 
-        fplane_right = camRot.matMul(new Vector4f((float) Math.tan(1/2 * hFOV) * fpDistance, 0, 0, 1));
-        fplane_bottom = camRot.matMul(new Vector4f(0, (float) -Math.tan(1/2 * vFOV) * fpDistance, 0, 1));
-        fplane_center = camRot.matMul(new Vector4f(0, 0, 1, 1));
+        fplane_right = camRot.matMul(new Vector4f((float) Math.tan(0.5 * Math.toRadians(hFOV)) * fpDistance, 0, 0, 1));
+        fplane_bottom = camRot.matMul(new Vector4f(0, (float) -Math.tan(0.5 * Math.toRadians(vFOV)) * fpDistance, 0, 1));
+        fplane_center = camRot.matMul(new Vector4f(0, 0, fpDistance, 1));
 
         imgToLocal = new Matrix4f(new float[]
                 {fplane_right.getX(), fplane_bottom.getX(), fplane_center.getX(), camPos.getX(),
@@ -95,4 +101,39 @@ public class FrustumInterpolator {
         this.setupFrustum();
     }
 
+    public Matrix4f getImgToLocal() {
+        return imgToLocal;
+    }
+
+    public Matrix4f getCamRot() {
+        return camRot;
+    }
+
+    public double gethFOV() {
+        return hFOV;
+    }
+
+    public double getvFOV() {
+        return vFOV;
+    }
+
+    public Vector4f getFplane_right() {
+        return fplane_right;
+    }
+
+    public Vector4f getFplane_bottom() {
+        return fplane_bottom;
+    }
+
+    public Vector4f getFplane_center() {
+        return fplane_center;
+    }
+
+    public Vector3f getCamPos() {
+        return camPos;
+    }
+
+    public Plane3f getCardinalAxisPlane() {
+        return cardinalAxisPlane;
+    }
 }

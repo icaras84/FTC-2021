@@ -137,8 +137,8 @@ public class TFMathExtension {
         car = Math.cos(Math.atan2(height, width));
         sar = Math.sin(Math.atan2(height, width));
 
-        hFov = 2 * Math.atan(car * Math.tan(dfov_radians)) * 180/Math.PI;
-        vFov = 2 * Math.atan(sar * Math.tan(dfov_radians)) * 180/Math.PI;
+        hFov = Math.atan(car * Math.tan(dfov_radians)) * 180/Math.PI;
+        vFov = Math.atan(sar * Math.tan(dfov_radians)) * 180/Math.PI;
 
         return new double[] {hFov, vFov};
     }
