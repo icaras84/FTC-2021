@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths;
+package org.firstinspires.ftc.teamcode.TFODOMH.TFMaths;
 
 public class TFMathExtension {
 
