@@ -4,19 +4,15 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.android.util.Size;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix3f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Matrix4fBuilder;
-import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.TFMathExtension;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector3f;
-import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
