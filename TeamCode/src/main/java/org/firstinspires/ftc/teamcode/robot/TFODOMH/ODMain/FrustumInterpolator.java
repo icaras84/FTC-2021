@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.robot.TFODOMH.TFMaths.Vector4f;
  */
 public class FrustumInterpolator {
 
-    private Matrix4f imgToLocal = null; //camera matrix will be used to modify frustum coordinates in local space
-    private Matrix4f camRot = null;
+    private Matrix4f imgToLocal; //camera matrix will be used to modify frustum coordinates in local space
+    private Matrix4f camRot;
 
     private double hFOV, vFOV; //horizontal and vertical fov, important for calculating the frustum later
     private Vector4f fplane_right = new Vector4f(), fplane_bottom = new Vector4f(), fplane_center = new Vector4f();
@@ -22,7 +22,7 @@ public class FrustumInterpolator {
     private Plane3f cardinalAxisPlane = Plane3f.X_PLANE;
 
     //presets for listed cameras
-    public static FrustumInterpolator Logitech_C270 = new FrustumInterpolator(TFMathExtension.convertDFov(55, 16, 9));
+    public static FrustumInterpolator Logitech_C270 = new FrustumInterpolator(TFMathExtension.findFOV(3.58, 2.11, 4));
 
     public FrustumInterpolator(double horizontal_fov, double vertical_fov, Matrix4f cam_rot, Vector3f cam_pos){
         this.hFOV = horizontal_fov;
@@ -99,6 +99,11 @@ public class FrustumInterpolator {
     public Vector3f convertIMGCoord(Vector4f bb_pos){
         Vector3f output = this.cardinalAxisPlane.getVector3fInt(camPos, this.imgToLocal.matMul(bb_pos).getAsVec3f());
         return output;
+    }
+
+    @Override
+    public String toString(){
+        return "";
     }
 
     /**

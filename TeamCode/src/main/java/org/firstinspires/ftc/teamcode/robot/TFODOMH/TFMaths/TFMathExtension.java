@@ -123,22 +123,16 @@ public class TFMathExtension {
     }
 
     /**
-     * This method converts the given diagonal, width, and height measurements
-     * <br> Courtesy of <a href="https://learnopencv.com/approximate-focal-length-for-webcams-and-cell-phone-cameras/#value">OpenCV</a>
-     * @param dFov
+     * This method converts the sensor width, sensor height, and focal length of a camera into horizontal & vertical FOV
      * @param width
      * @param height
+     * @param focal_len
      * @return
      */
-    public static double[] convertDFov(double dFov, int width, int height){
-        double hFov, vFov, dfov_radians, car, sar;
-        dfov_radians = dFov * Math.PI/180;
-
-        car = Math.cos(Math.atan2(height, width));
-        sar = Math.sin(Math.atan2(height, width));
-
-        hFov = Math.atan(car * Math.tan(dfov_radians)) * 180/Math.PI;
-        vFov = Math.atan(sar * Math.tan(dfov_radians)) * 180/Math.PI;
+    public static double[] findFOV(double width, double height, double focal_len){
+        double hFov, vFov;
+        hFov = 2 * Math.atan2(width, 2 * focal_len);
+        vFov = 2 * Math.atan2(height, 2 * focal_len);
 
         return new double[] {hFov, vFov};
     }
